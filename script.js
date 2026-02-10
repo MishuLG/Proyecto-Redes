@@ -2,13 +2,29 @@
 
 // --- UTILS ---
 function generateMAC() {
-    return "00:E0:" + Array.from({length: 4}, () => Math.floor(Math.random()*256).toString(16).padStart(2, '0').toUpperCase()).join(':');
+    return "00:E0:" + Array.from({ length: 4 }, () => Math.floor(Math.random() * 256).toString(16).padStart(2, '0').toUpperCase()).join(':');
 }
 
 // --- CONFIG CANVAS ---
 const canvas = document.getElementById('networkCanvas');
 const ctx = canvas.getContext('2d');
 let canvasBounds;
+const icons = {
+    router: new Image(),
+    pc: new Image(),
+    switch: new Image()
+};
+icons.router.src = 'img/router.png'; // Asegúrate de que la ruta sea correcta
+icons.pc.src = 'img/pc.png';
+icons.switch.src = 'img/switch.png';
+
+function distToSegment(p, v, w) {
+    const l2 = Math.pow(v.x - w.x, 2) + Math.pow(v.y - w.y, 2);
+    if (l2 === 0) return Math.hypot(p.x - v.x, p.y - v.y);
+    let t = ((p.x - v.x) * (w.x - v.x) + (p.y - v.y) * (w.y - v.y)) / l2;
+    t = Math.max(0, Math.min(1, t));
+    return Math.hypot(p.x - (v.x + t * (w.x - v.x)), p.y - (v.y + t * (w.y - v.y)));
+}
 
 function resizeCanvas() {
     const container = document.getElementById('workspace');
@@ -42,39 +58,39 @@ class Device {
         if (type === 'pc') {
             this.name = `PC${id}`;
             this.color = '#198754';
-            this.unicode = '\uf108'; 
+            this.unicode = '\uf108';
             this.config = { ip: '', mask: '', gateway: '', dns: '' };
             // PC tiene 1 puerto Ethernet (index 0)
-            this.interfaces.push({ 
-                name: 'FastEthernet0', 
-                mac: generateMAC(), 
-                ip: '', mask: '', 
+            this.interfaces.push({
+                name: 'FastEthernet0',
+                mac: generateMAC(),
+                ip: '', mask: '',
                 adminStatus: true,  // PC siempre encendida por defecto
-                connected: false 
+                connected: false
             });
-        } 
+        }
         else if (type === 'router') {
             this.name = `Router${id}`;
             this.color = '#0d6efd';
-            this.unicode = '\uf4e2'; 
+            this.unicode = '\uf4e2';
             // 2 Gig, 1 Serial
             this.interfaces.push({ name: 'GigabitEthernet0/0', mac: generateMAC(), ip: '', mask: '', adminStatus: false, connected: false });
             this.interfaces.push({ name: 'GigabitEthernet0/1', mac: generateMAC(), ip: '', mask: '', adminStatus: false, connected: false });
             this.interfaces.push({ name: 'Serial0/0/0', mac: '', ip: '', mask: '', adminStatus: false, connected: false });
-        } 
+        }
         else if (type === 'switch') {
             this.name = `Switch${id}`;
             this.color = '#fd7e14';
-            this.unicode = '\uf0e8'; 
+            this.unicode = '\uf0e8';
             // 24 Puertos
-            for(let i=1; i<=24; i++) {
-                this.interfaces.push({ 
-                    name: `FastEthernet0/${i}`, 
-                    mac: generateMAC(), 
-                    vlan: 1, 
-                    mode: 'access', 
-                    adminStatus: true, 
-                    connected: false 
+            for (let i = 1; i <= 24; i++) {
+                this.interfaces.push({
+                    name: `FastEthernet0/${i}`,
+                    mac: generateMAC(),
+                    vlan: 1,
+                    mode: 'access',
+                    adminStatus: true,
+                    connected: false
                 });
             }
         }
@@ -92,7 +108,7 @@ function dragOverHandler(ev) { ev.preventDefault(); }
 function dropHandler(ev) {
     ev.preventDefault();
     const type = ev.dataTransfer.getData("type");
-    if(!type) return;
+    if (!type) return;
     const x = ev.clientX - canvasBounds.left;
     const y = ev.clientY - canvasBounds.top;
     devices.push(new Device(devices.length, type, x, y));
@@ -102,7 +118,7 @@ function dropHandler(ev) {
 // --- LÓGICA DE CONEXIÓN (MEJORADA) ---
 
 function selectCable(type) {
-    if(currentCableType === type) {
+    if (currentCableType === type) {
         currentCableType = null;
         cableStartDevice = null;
         document.getElementById('workspace').style.cursor = 'default';
@@ -112,24 +128,28 @@ function selectCable(type) {
         cableStartDevice = null;
         document.getElementById('workspace').style.cursor = 'crosshair';
         document.getElementById('selected-cable-text').innerText = `Cable ${type.toUpperCase()} seleccionado`;
+    }// Dentro de selectCable(type)
+    if (type === 'eraser') {
+        document.getElementById('workspace').style.cursor = 'cell'; // O un icono de borrador si tienes
+        document.getElementById('selected-cable-text').innerText = "Modo Borrador Activo";
     }
     updateCableButtons();
 }
 
 function updateCableButtons() {
     document.querySelectorAll('.cable-btn').forEach(btn => btn.classList.remove('active'));
-    if(currentCableType) {
+    if (currentCableType) {
         // Buscar botón aproximado
         const btn = document.querySelector(`.cable-btn[onclick*="'${currentCableType}'"]`);
-        if(btn) btn.classList.add('active');
+        if (btn) btn.classList.add('active');
     }
 }
 
 function resolveAutoCable(d1, d2) {
-    if(d1.type === 'router' && d2.type === 'router') return 'serial';
-    if(d1.type === 'pc' && d2.type === 'pc') return 'cross';
-    if(d1.type === 'switch' && d2.type === 'switch') return 'cross';
-    if((d1.type === 'pc' && d2.type === 'router') || (d1.type === 'router' && d2.type === 'pc')) return 'cross';
+    if (d1.type === 'router' && d2.type === 'router') return 'serial';
+    if (d1.type === 'pc' && d2.type === 'pc') return 'cross';
+    if (d1.type === 'switch' && d2.type === 'switch') return 'cross';
+    if ((d1.type === 'pc' && d2.type === 'router') || (d1.type === 'router' && d2.type === 'pc')) return 'cross';
     return 'straight';
 }
 
@@ -138,17 +158,28 @@ function connectDevices(d1, d2) {
     const p1Index = d1.getFirstFreePort();
     const p2Index = d2.getFirstFreePort();
 
-    if (p1Index === -1) { alert(`${d1.name} no tiene puertos libres.`); return; }
-    if (p2Index === -1) { alert(`${d2.name} no tiene puertos libres.`); return; }
+    if (p1Index === -1) {
+        alertSystem.error(`${d1.name} no tiene puertos libres.`);
+        return;
+    }
+    if (p2Index === -1) {
+        alertSystem.error(`${d2.name} no tiene puertos libres.`);
+        return;
+    }
 
     // 2. Determinar tipo cable
     let type = currentCableType;
     if (type === 'auto') type = resolveAutoCable(d1, d2);
+    const validation = ConnectionSchema.validate(type, d1.interfaces[p1Index].name, d2.interfaces[p2Index].name);
+    if (!validation.isValid) {
+        alertSystem.error(validation.message);
+        return;
+    }
 
     // 3. Crear conexión física
     cables.push({
-        from: d1.id, to: d2.id, 
-        fromPort: p1Index, toPort: p2Index, 
+        from: d1.id, to: d2.id,
+        fromPort: p1Index, toPort: p2Index,
         type: type
     });
 
@@ -160,7 +191,9 @@ function connectDevices(d1, d2) {
     cableStartDevice = null;
     currentCableType = null;
     document.getElementById('workspace').style.cursor = 'default';
-    document.getElementById('selected-cable-text').innerText = "Conexión Exitosa";
+    document.getElementById('selected-cable-text').innerText = "Selecciona un cable";
+    alertSystem.success(`Conexión exitosa: ${d1.name} ↔ ${d2.name}`);
+    console.log(`Cable ${type} conectado: ${d1.name}[${d1.interfaces[p1Index].name}] ↔ ${d2.name}[${d2.interfaces[p2Index].name}]`);
     updateCableButtons();
     draw();
 }
@@ -173,16 +206,16 @@ function draw() {
     cables.forEach(c => {
         const d1 = devices.find(d => d.id === c.from);
         const d2 = devices.find(d => d.id === c.to);
-        if(!d1 || !d2) return;
+        if (!d1 || !d2) return;
 
         ctx.beginPath();
         ctx.moveTo(d1.x, d1.y);
         ctx.lineTo(d2.x, d2.y);
         ctx.lineWidth = 3;
-        ctx.setLineDash([]); 
+        ctx.setLineDash([]);
 
         // Estilos
-        switch(c.type) {
+        switch (c.type) {
             case 'console': ctx.strokeStyle = '#0dcaf0'; break;
             case 'straight': ctx.strokeStyle = '#212529'; break;
             case 'cross': ctx.strokeStyle = '#212529'; ctx.setLineDash([10, 5]); break;
@@ -201,22 +234,29 @@ function draw() {
 
     // Dispositivos
     devices.forEach(d => {
-        ctx.shadowBlur = 15; ctx.shadowColor = "rgba(0,0,0,0.15)";
-        ctx.fillStyle = d.color;
-        ctx.beginPath(); ctx.arc(d.x, d.y, 28, 0, Math.PI * 2); ctx.fill();
-        ctx.shadowBlur = 0;
-        
-        ctx.fillStyle = 'white'; ctx.font = '900 20px "Font Awesome 6 Free"';
-        ctx.textAlign = 'center'; ctx.textBaseline = 'middle';
-        ctx.fillText(d.unicode, d.x, d.y);
+        const img = icons[d.type];
 
-        ctx.fillStyle = '#343a40'; ctx.font = 'bold 12px Segoe UI';
-        ctx.fillText(d.name, d.x, d.y + 45);
+        // 1. Dibujar la Imagen (O círculo de carga si no ha bajado la imagen)
+        if (img.complete && img.naturalWidth !== 0) {
+            // Dibujamos la imagen centrada (50x50px)
+            ctx.drawImage(img, d.x - 25, d.y - 25, 50, 50);
+        } else {
+            // Fallback: Mientras carga la imagen, dibujamos el círculo original
+            ctx.fillStyle = d.color;
+            ctx.beginPath(); ctx.arc(d.x, d.y, 25, 0, Math.PI * 2); ctx.fill();
+        }
 
-        // Mostrar IP si existe en interfaz 0 (Simplificación visual)
-        if(d.interfaces[0] && d.interfaces[0].ip) {
-            ctx.fillStyle = '#dc3545'; ctx.font = '11px Consolas';
-            ctx.fillText(d.interfaces[0].ip, d.x, d.y - 40);
+        // 2. Nombre del dispositivo (Debajo)
+        ctx.fillStyle = '#343a40';
+        ctx.font = 'bold 12px Segoe UI';
+        ctx.textAlign = 'center';
+        ctx.fillText(d.name, d.x, d.y + 40);
+
+        // 3. Mostrar IP si existe (Encima)
+        if (d.interfaces[0] && d.interfaces[0].ip) {
+            ctx.fillStyle = '#dc3545';
+            ctx.font = '11px Consolas';
+            ctx.fillText(d.interfaces[0].ip, d.x, d.y - 35);
         }
     });
 
@@ -237,7 +277,7 @@ function drawLinkLight(device, portIndex, x1, y1, x2, y2) {
     const iface = device.interfaces[portIndex];
     // Estado lógico: Si es Switch/PC suele estar UP si conectado. Router requiere no shut.
     let isUp = iface.connected && iface.adminStatus;
-    
+
     ctx.beginPath();
     ctx.arc(lx, ly, 4, 0, Math.PI * 2);
     ctx.fillStyle = isUp ? '#00ff00' : '#ff0000'; // Verde o Rojo
@@ -245,18 +285,57 @@ function drawLinkLight(device, portIndex, x1, y1, x2, y2) {
 }
 
 // --- INTERACCIÓN ---
-let lastMousePos = {x:0, y:0};
+let lastMousePos = { x: 0, y: 0 };
 
 canvas.addEventListener('mousedown', e => {
     const x = e.offsetX, y = e.offsetY;
-    const clicked = devices.find(d => Math.hypot(d.x - x, d.y - y) < 30);
 
+    // Si estamos en modo borrador
+    if (currentCableType === 'eraser') {
+        // 1. Intentar borrar dispositivo
+        const deviceIdx = devices.findIndex(d => Math.hypot(d.x - x, d.y - y) < 30);
+        if (deviceIdx !== -1) {
+            const deviceId = devices[deviceIdx].id;
+            // Borrar cables asociados
+            cables = cables.filter(c => c.from !== deviceId && c.to !== deviceId);
+            // Borrar dispositivo
+            devices.splice(deviceIdx, 1);
+            alertSystem.warning("Dispositivo y conexiones eliminados");
+            draw();
+            return;
+        }
+
+        // 2. Intentar borrar cable (si no tocó un dispositivo)
+        const cableIdx = cables.findIndex(c => {
+            const d1 = devices.find(d => d.id === c.from);
+            const d2 = devices.find(d => d.id === c.to);
+            if (!d1 || !d2) return false;
+            return distToSegment({ x, y }, { x: d1.x, y: d1.y }, { x: d2.x, y: d2.y }) < 5;
+        });
+
+        if (cableIdx !== -1) {
+            // Liberar los puertos antes de borrar el cable
+            const cable = cables[cableIdx];
+            const d1 = devices.find(d => d.id === cable.from);
+            const d2 = devices.find(d => d.id === cable.to);
+            if (d1) d1.interfaces[cable.fromPort].connected = false;
+            if (d2) d2.interfaces[cable.toPort].connected = false;
+
+            cables.splice(cableIdx, 1);
+            alertSystem.info("Cable eliminado");
+            draw();
+        }
+        return;
+    }
+
+    // --- Lógica original para conectar o arrastrar (si no es eraser) ---
+    const clicked = devices.find(d => Math.hypot(d.x - x, d.y - y) < 30);
     if (clicked) {
         if (currentCableType) {
             if (!cableStartDevice) {
                 cableStartDevice = clicked;
             } else {
-                if(cableStartDevice !== clicked) connectDevices(cableStartDevice, clicked);
+                if (cableStartDevice !== clicked) connectDevices(cableStartDevice, clicked);
             }
         } else {
             draggingDevice = clicked;
@@ -266,13 +345,13 @@ canvas.addEventListener('mousedown', e => {
 });
 
 canvas.addEventListener('mousemove', e => {
-    lastMousePos = {x: e.offsetX, y: e.offsetY};
+    lastMousePos = { x: e.offsetX, y: e.offsetY };
     if (draggingDevice) { draggingDevice.x = e.offsetX; draggingDevice.y = e.offsetY; draw(); }
     if (currentCableType && cableStartDevice) draw();
 });
 canvas.addEventListener('mouseup', () => draggingDevice = null);
 canvas.addEventListener('dblclick', e => {
-    if(!currentCableType) {
+    if (!currentCableType) {
         const clicked = devices.find(d => Math.hypot(d.x - e.offsetX, d.y - e.offsetY) < 30);
         if (clicked) openDeviceModal(clicked);
     }
@@ -302,7 +381,7 @@ function openDeviceModal(device) {
             <div class="form-group"><label>Default Gateway</label><input type="text" id="pc-gw" value="${device.config.gateway}"></div>
             <div class="form-group"><label>MAC Address</label><input type="text" disabled value="${eth.mac}" style="background:#eee; color:#666;"></div>
         </div>`;
-    } 
+    }
     else if (device.type === 'router') {
         let rows = '';
         device.interfaces.forEach((iface, idx) => {
@@ -319,9 +398,9 @@ function openDeviceModal(device) {
     else if (device.type === 'switch') {
         let rows = '';
         // Solo mostrar primeros 6 puertos para no saturar
-        for(let i=0; i<6; i++) {
+        for (let i = 0; i < 6; i++) {
             let p = device.interfaces[i];
-            rows += `<tr><td>${p.name}</td><td><select id="sw-vlan-${i}"><option value="1" ${p.vlan==1?'selected':''}>1 (Default)</option><option value="10" ${p.vlan==10?'selected':''}>10</option></select></td><td><select id="sw-mode-${i}"><option value="access" ${p.mode=='access'?'selected':''}>Access</option><option value="trunk" ${p.mode=='trunk'?'selected':''}>Trunk</option></select></td></tr>`;
+            rows += `<tr><td>${p.name}</td><td><select id="sw-vlan-${i}"><option value="1" ${p.vlan == 1 ? 'selected' : ''}>1 (Default)</option><option value="10" ${p.vlan == 10 ? 'selected' : ''}>10</option></select></td><td><select id="sw-mode-${i}"><option value="access" ${p.mode == 'access' ? 'selected' : ''}>Access</option><option value="trunk" ${p.mode == 'trunk' ? 'selected' : ''}>Trunk</option></select></td></tr>`;
         }
         html += `<div class="config-section"><div class="section-title">Puertos (1-6)</div><table class="interface-table"><thead><tr><th>Puerto</th><th>VLAN</th><th>Modo</th></tr></thead><tbody>${rows}</tbody></table></div>`;
     }
@@ -332,9 +411,9 @@ function openDeviceModal(device) {
 }
 
 function saveCurrentConfig() {
-    if(!currentDevice) return;
+    if (!currentDevice) return;
     const newName = document.getElementById('gui-hostname').value;
-    if(newName) currentDevice.name = newName;
+    if (newName) currentDevice.name = newName;
 
     if (currentDevice.type === 'pc') {
         const eth = currentDevice.interfaces[0];
@@ -350,13 +429,13 @@ function saveCurrentConfig() {
             iface.adminStatus = document.getElementById(`r-on-${idx}`).checked;
         });
     } else if (currentDevice.type === 'switch') {
-        for(let i=0; i<6; i++) {
+        for (let i = 0; i < 6; i++) {
             currentDevice.interfaces[i].vlan = document.getElementById(`sw-vlan-${i}`).value;
             currentDevice.interfaces[i].mode = document.getElementById(`sw-mode-${i}`).value;
         }
     }
     draw();
-    alert("Configuración aplicada.");
+    alertSystem.success("Configuración aplicada correctamente.");
 }
 
 function closeModal() { document.getElementById('device-modal').style.display = 'none'; currentDevice = null; }
@@ -370,7 +449,7 @@ function switchTab(tab) {
 
 // --- CLI LÓGICA ---
 function updatePrompt() {
-    if(!currentDevice) return;
+    if (!currentDevice) return;
     const d = currentDevice;
     let s = '>'; let context = '';
     if (d.cliMode === 'privileged') s = '#';
@@ -379,15 +458,29 @@ function updatePrompt() {
     document.getElementById('prompt').innerText = `${d.name}${context}${s}`;
 }
 
+function deleteCurrentDevice() {
+    if (!currentDevice) return;
+
+    // 1. Eliminar cables conectados a este dispositivo
+    cables = cables.filter(c => c.from !== currentDevice.id && c.to !== currentDevice.id);
+
+    // 2. Eliminar el dispositivo del array
+    devices = devices.filter(d => d.id !== currentDevice.id);
+
+    closeModal();
+    draw();
+    alertSystem.warning("Dispositivo eliminado.");
+}
+
 function handleCommand(e) {
-    if(e.key !== 'Enter') return;
+    if (e.key !== 'Enter') return;
     const input = e.target;
     const line = input.value.trim();
     const output = document.getElementById('terminal-output');
     output.innerText += `\n${document.getElementById('prompt').innerText} ${line}`;
     input.value = '';
 
-    if(!line) return;
+    if (!line) return;
     const parts = line.split(' ');
     const cmd = parts[0].toLowerCase();
     const d = currentDevice;
@@ -411,7 +504,7 @@ function handleCommand(e) {
                 d.interfaces.forEach(i => {
                     const status = i.adminStatus ? 'up' : 'administratively down';
                     const proto = (i.adminStatus && i.connected) ? 'up' : 'down';
-                    res += `${i.name.padEnd(22)} ${ (i.ip || 'unassigned').padEnd(15) } ${status.padEnd(11)} ${proto}\n`;
+                    res += `${i.name.padEnd(22)} ${(i.ip || 'unassigned').padEnd(15)} ${status.padEnd(11)} ${proto}\n`;
                 });
             }
             else if (cmd === 'disable') d.cliMode = 'user';
@@ -419,32 +512,32 @@ function handleCommand(e) {
             if (cmd === 'interface' || cmd === 'int') {
                 // Búsqueda inteligente de interfaz
                 const searchName = parts[1].toLowerCase();
-                const idx = d.interfaces.findIndex(i => i.name.toLowerCase().includes(searchName) || i.name.toLowerCase().replace('gigabitethernet','gi') === searchName);
-                if(idx !== -1) { d.selectedInterfaceIndex = idx; d.cliMode = 'config-if'; }
+                const idx = d.interfaces.findIndex(i => i.name.toLowerCase().includes(searchName) || i.name.toLowerCase().replace('gigabitethernet', 'gi') === searchName);
+                if (idx !== -1) { d.selectedInterfaceIndex = idx; d.cliMode = 'config-if'; }
                 else res = '% Invalid interface type and number';
             }
             else if (cmd === 'hostname') { d.name = parts[1]; draw(); }
             else if (cmd === 'exit') d.cliMode = 'privileged';
         } else if (d.cliMode === 'config-if') {
-             if(cmd === 'ip' && parts[1] === 'address') { 
-                 d.interfaces[d.selectedInterfaceIndex].ip = parts[2]; 
-                 d.interfaces[d.selectedInterfaceIndex].mask = parts[3];
-                 draw(); 
-             }
-             else if (cmd === 'no' && parts[1] === 'shutdown') {
-                 d.interfaces[d.selectedInterfaceIndex].adminStatus = true;
-                 res = `%LINK-3-UPDOWN: Interface ${d.interfaces[d.selectedInterfaceIndex].name}, changed state to up`;
-                 draw(); // Actualizar luz verde
-             }
-             else if (cmd === 'shutdown') {
-                 d.interfaces[d.selectedInterfaceIndex].adminStatus = false;
-                 res = `%LINK-5-CHANGED: Interface ${d.interfaces[d.selectedInterfaceIndex].name}, changed state to administratively down`;
-                 draw(); // Actualizar luz roja
-             }
-             else if (cmd === 'exit') d.cliMode = 'config';
+            if (cmd === 'ip' && parts[1] === 'address') {
+                d.interfaces[d.selectedInterfaceIndex].ip = parts[2];
+                d.interfaces[d.selectedInterfaceIndex].mask = parts[3];
+                draw();
+            }
+            else if (cmd === 'no' && parts[1] === 'shutdown') {
+                d.interfaces[d.selectedInterfaceIndex].adminStatus = true;
+                res = `%LINK-3-UPDOWN: Interface ${d.interfaces[d.selectedInterfaceIndex].name}, changed state to up`;
+                draw(); // Actualizar luz verde
+            }
+            else if (cmd === 'shutdown') {
+                d.interfaces[d.selectedInterfaceIndex].adminStatus = false;
+                res = `%LINK-5-CHANGED: Interface ${d.interfaces[d.selectedInterfaceIndex].name}, changed state to administratively down`;
+                draw(); // Actualizar luz roja
+            }
+            else if (cmd === 'exit') d.cliMode = 'config';
         }
     }
-    if(res) output.innerText += `\n${res}`;
+    if (res) output.innerText += `\n${res}`;
     updatePrompt();
     document.getElementById('terminal-view').scrollTop = 99999;
 }

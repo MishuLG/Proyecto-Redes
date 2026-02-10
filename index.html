@@ -7,6 +7,7 @@
     <title>NetSim Pro - Logic Upgrade</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="alerts.css">
 </head>
 
 <body>
@@ -48,7 +49,11 @@
                 <button class="cable-btn" onclick="selectCable('serial')" title="Serial">
                     <div class="cable-icon serial-bg"></div>
                 </button>
+                <button class="cable-btn" onclick="selectCable('eraser')" title="Borrador">
+                    <i class="fas fa-eraser" style="color: #ffffff;"></i>
+                </button>
             </div>
+
             <p id="selected-cable-text" class="hint">Selecciona un cable</p>
         </div>
     </div>
@@ -70,6 +75,10 @@
         <div id="tab-config" class="tab-content active">
             <div id="config-form-container"></div>
             <div class="modal-footer">
+                <button class="btn-cancel" onclick="deleteCurrentDevice()"
+                    style="background-color: #dc3545; float: left;">
+                    <i class="fas fa-trash"></i> Borrar
+                </button>
                 <button class="btn-cancel" onclick="closeModal()">Cerrar</button>
                 <button class="btn-save" onclick="saveCurrentConfig()">Aplicar Cambios</button>
             </div>
@@ -86,6 +95,8 @@
         </div>
     </div>
 
+    <script src="alerts.js"></script>
+    <script src="validation.js"></script>
     <script src="script.js"></script>
 </body>
 
