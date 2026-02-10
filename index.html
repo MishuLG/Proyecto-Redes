@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NetSim Pro - Logic Upgrade</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <div id="sidebar">
+        <div class="brand">NetSim <span>Pro</span></div>
+        
+        <h3 class="section-header">Dispositivos</h3>
+        <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'router')">
+            <i class="fas fa-circle-nodes router-icon"></i>
+            <div><span class="d-name">Router</span><span class="d-desc">Cisco 2911 (3 Puertos)</span></div>
+        </div>
+        <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'switch')">
+            <i class="fas fa-sitemap switch-icon"></i>
+            <div><span class="d-name">Switch</span><span class="d-desc">Cisco 2960 (24 Puertos)</span></div>
+        </div>
+        <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'pc')">
+            <i class="fas fa-desktop pc-icon"></i>
+            <div><span class="d-name">PC Genérico</span><span class="d-desc">1 Puerto Ethernet</span></div>
+        </div>
+
+        <div class="connections-panel">
+            <h3 class="section-header">Conexiones</h3>
+            <div class="cables-grid">
+                <button class="cable-btn" onclick="selectCable('auto')" title="Automático"><i class="fas fa-bolt" style="color: gold;"></i></button>
+                <button class="cable-btn" onclick="selectCable('console')" title="Consola"><div class="cable-icon console-bg"></div></button>
+                <button class="cable-btn" onclick="selectCable('straight')" title="Directo"><div class="cable-icon straight-bg"></div></button>
+                <button class="cable-btn" onclick="selectCable('cross')" title="Cruzado"><div class="cable-icon cross-bg"></div></button>
+                <button class="cable-btn" onclick="selectCable('fiber')" title="Fibra"><div class="cable-icon fiber-bg"></div></button>
+                <button class="cable-btn" onclick="selectCable('serial')" title="Serial"><div class="cable-icon serial-bg"></div></button>
+            </div>
+            <p id="selected-cable-text" class="hint">Selecciona un cable</p>
+        </div>
+    </div>
+
+    <div id="workspace" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+        <canvas id="networkCanvas"></canvas>
+    </div>
+
+    <div id="device-modal">
+        <div class="modal-header">
+            <span class="modal-title"><i class="fas fa-cog"></i> <span id="modal-device-name">Configuración</span></span>
+            <i class="fas fa-times close-btn" onclick="closeModal()"></i>
+        </div>
+        <div class="tabs">
+            <button class="tab-btn active" id="btn-tab-config" onclick="switchTab('config')">Físico / Config</button>
+            <button class="tab-btn" id="btn-tab-cli" onclick="switchTab('cli')">CLI (IOS)</button>
+        </div>
+        <div id="tab-config" class="tab-content active">
+            <div id="config-form-container"></div>
+            <div class="modal-footer">
+                <button class="btn-cancel" onclick="closeModal()">Cerrar</button>
+                <button class="btn-save" onclick="saveCurrentConfig()">Aplicar Cambios</button>
+            </div>
+        </div>
+        <div id="tab-cli" class="tab-content" style="padding:0; display:none; background-color: #1e272e;">
+            <div id="terminal-view" onclick="document.getElementById('terminal-input').focus()">
+                <div id="terminal-output">Simulador de IOS</div>
+                <div class="input-line">
+                    <span id="prompt">Router></span>
+                    <input type="text" id="terminal-input" autocomplete="off" spellcheck="false" onkeydown="handleCommand(event)">
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
