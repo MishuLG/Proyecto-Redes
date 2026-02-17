@@ -2,7 +2,7 @@
 
 const Persistence = {
 
-    STORAGE_KEY: 'netsim-pro-topology',
+    STORAGE_KEY: 'capacho-tracer-topology',
     VERSION: 1,
 
     // ============================
@@ -146,7 +146,7 @@ const Persistence = {
         const url = URL.createObjectURL(blob);
         const anchor = document.createElement('a');
         anchor.href = url;
-        anchor.download = `netsim-topology-${Date.now()}.json`;
+        anchor.download = `capacho-tracer-topology-${Date.now()}.json`;
         document.body.appendChild(anchor);
         anchor.click();
         document.body.removeChild(anchor);

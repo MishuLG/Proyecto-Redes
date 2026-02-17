@@ -4,9 +4,9 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NetSim Pro — Simulador de Redes</title>
+    <title>Capacho Tracer — Simulador de Redes</title>
     <meta name="description"
-        content="NetSim Pro es un simulador de redes interactivo con soporte para routers, switches y PCs. Configura interfaces, crea topologías y practica comandos Cisco IOS en tu navegador.">
+        content="Capacho Tracer es un simulador de redes interactivo con soporte para routers, switches y PCs. Configura interfaces, crea topologías y practica comandos Cisco IOS en tu navegador.">
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
@@ -17,19 +17,16 @@
 
 <body>
 
-    <!-- ═══════════════ SIDEBAR ═══════════════ -->
     <aside id="sidebar">
         <div class="sidebar-inner">
 
-            <!-- Logo -->
             <div class="brand">
                 <div class="brand-icon"><i class="fas fa-network-wired"></i></div>
                 <div>
-                    <span class="brand-text">NetSim<span class="brand-accent">Pro</span></span>
+                    <span class="brand-text">Capacho <span class="brand-accent">Tracer</span></span>
                 </div>
             </div>
 
-            <!-- Dispositivos -->
             <div class="sidebar-section">
                 <h3 class="section-header"><i class="fas fa-microchip"></i> Dispositivos</h3>
                 <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'router')">
@@ -58,7 +55,6 @@
                 </div>
             </div>
 
-            <!-- Herramientas -->
             <div class="sidebar-section">
                 <h3 class="section-header"><i class="fas fa-wrench"></i> Herramientas</h3>
                 <div class="undo-redo-bar">
@@ -79,10 +75,12 @@
                     <button class="tool-btn tool-btn-danger" onclick="Persistence.clearAll()" title="Limpiar todo">
                         <i class="fas fa-trash-alt"></i> <span>Limpiar</span>
                     </button>
+                    <button class="tool-btn" onclick="Subnetting.openModal()" title="Calculadora IP" style="grid-column: span 3; border-color: var(--accent-green); color: var(--accent-green);">
+                        <i class="fas fa-calculator"></i> <span>Calculadora Subnetting</span>
+                    </button>
                 </div>
             </div>
 
-            <!-- Conexiones (empujado al fondo) -->
             <div class="sidebar-section connections-panel">
                 <h3 class="section-header"><i class="fas fa-plug"></i> Conexiones</h3>
                 <div class="cables-grid">
@@ -115,7 +113,6 @@
         </div>
     </aside>
 
-    <!-- ═══════════════ WORKSPACE ═══════════════ -->
     <main id="workspace" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
         <canvas id="networkCanvas"></canvas>
         <div class="workspace-watermark">
@@ -124,10 +121,8 @@
         </div>
     </main>
 
-    <!-- ═══════════════ MODAL BACKDROP ═══════════════ -->
     <div id="modal-overlay" onclick="closeModal()"></div>
 
-    <!-- ═══════════════ MODAL ═══════════════ -->
     <div id="device-modal">
         <div class="modal-header">
             <span class="modal-title">
@@ -168,7 +163,7 @@
 | | | |  _|  |__   || || |_| |    |   __|    -|  |  |
 |_|___|_|    |_____||_||_|_|_|    |__|  |__|__|_____|
 
-NetSim Pro — Simulador IOS v2.0
+Capacho Tracer — Simulador IOS v2.0
 Escribe '?' para ver los comandos disponibles.
 ──────────────────────────────────────────────────</div>
                 <div class="input-line">
@@ -180,7 +175,51 @@ Escribe '?' para ver los comandos disponibles.
         </div>
     </div>
 
-    <!-- ═══════════════ SCRIPTS ═══════════════ -->
+    <div id="subnet-modal" class="modal-wrapper" style="display:none;">
+        <div class="modal-content subnet-content">
+            <div class="modal-header">
+                <span class="modal-title">
+                    <i class="fas fa-network-wired"></i> Calculadora de Subnetting
+                </span>
+                <button class="close-btn" onclick="Subnetting.closeModal()">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            
+            <div class="subnet-body">
+                <div class="subnet-inputs">
+                    <div class="form-group">
+                        <label>Dirección IP (Host o Red)</label>
+                        <input type="text" id="calc-ip" placeholder="Ej: 192.168.1.10" value="192.168.1.1">
+                    </div>
+                    <div class="form-group">
+                        <label>Prefijo CIDR ( /? )</label>
+                        <select id="calc-cidr">
+                            </select>
+                    </div>
+                    <button class="btn-save" onclick="Subnetting.calculate()" style="height: 42px; margin-top: 23px; background: var(--gradient-green);">
+                        <i class="fas fa-bolt"></i> Calcular
+                    </button>
+                </div>
+
+                <div class="subnet-results" id="subnet-results-container" style="display:none;">
+                    <table class="interface-table">
+                        <thead>
+                            <tr>
+                                <th width="30%">Dato</th>
+                                <th width="30%">Valor</th>
+                                <th>¿Dónde usarlo en el simulador?</th>
+                            </tr>
+                        </thead>
+                        <tbody id="subnet-table-body">
+                            </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/subnetting.js"></script>
     <script src="alerts.js"></script>
     <script src="validation.js"></script>
     <script src="js/device.js"></script>
