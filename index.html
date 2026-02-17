@@ -4,7 +4,12 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>NetSim Pro - Logic Upgrade</title>
+    <title>NetSim Pro — Simulador de Redes</title>
+    <meta name="description"
+        content="NetSim Pro es un simulador de redes interactivo con soporte para routers, switches y PCs. Configura interfaces, crea topologías y practica comandos Cisco IOS en tu navegador.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="alerts.css">
@@ -12,80 +17,160 @@
 
 <body>
 
-    <div id="sidebar">
-        <div class="brand">NetSim <span>Pro</span></div>
+    <!-- ═══════════════ SIDEBAR ═══════════════ -->
+    <aside id="sidebar">
+        <div class="sidebar-inner">
 
-        <h3 class="section-header">Dispositivos.</h3>
-        <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'router')">
-            <i class="fas fa-circle-nodes router-icon"></i>
-            <div><span class="d-name">Router</span><span class="d-desc">Cisco 2911 (3 Puertos)</span></div>
-        </div>
-        <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'switch')">
-            <i class="fas fa-sitemap switch-icon"></i>
-            <div><span class="d-name">Switch</span><span class="d-desc">Cisco 2960 (24 Puertos)</span></div>
-        </div>
-        <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'pc')">
-            <i class="fas fa-desktop pc-icon"></i>
-            <div><span class="d-name">PC Genérico</span><span class="d-desc">1 Puerto Ethernet</span></div>
-        </div>
-
-        <div class="connections-panel">
-            <h3 class="section-header">Conexiones</h3>
-            <div class="cables-grid">
-                <button class="cable-btn" onclick="selectCable('auto')" title="Automático"><i class="fas fa-bolt"
-                        style="color: gold;"></i></button>
-                <button class="cable-btn" onclick="selectCable('console')" title="Consola">
-                    <div class="cable-icon console-bg"></div>
-                </button>
-                <button class="cable-btn" onclick="selectCable('straight')" title="Directo">
-                    <div class="cable-icon straight-bg"></div>
-                </button>
-                <button class="cable-btn" onclick="selectCable('cross')" title="Cruzado">
-                    <div class="cable-icon cross-bg"></div>
-                </button>
-                <button class="cable-btn" onclick="selectCable('fiber')" title="Fibra">
-                    <div class="cable-icon fiber-bg"></div>
-                </button>
-                <button class="cable-btn" onclick="selectCable('serial')" title="Serial">
-                    <div class="cable-icon serial-bg"></div>
-                </button>
-                <button class="cable-btn" onclick="selectCable('eraser')" title="Borrador">
-                    <i class="fas fa-eraser" style="color: #ffffff;"></i>
-                </button>
+            <!-- Logo -->
+            <div class="brand">
+                <div class="brand-icon"><i class="fas fa-network-wired"></i></div>
+                <div>
+                    <span class="brand-text">NetSim<span class="brand-accent">Pro</span></span>
+                </div>
             </div>
 
-            <p id="selected-cable-text" class="hint">Selecciona un cable</p>
+            <!-- Dispositivos -->
+            <div class="sidebar-section">
+                <h3 class="section-header"><i class="fas fa-microchip"></i> Dispositivos</h3>
+                <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'router')">
+                    <div class="palette-icon router-icon"><i class="fas fa-circle-nodes"></i></div>
+                    <div class="palette-info">
+                        <span class="d-name">Router</span>
+                        <span class="d-desc">Cisco 2911 · 3 Puertos</span>
+                    </div>
+                    <i class="fas fa-grip-vertical drag-hint"></i>
+                </div>
+                <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'switch')">
+                    <div class="palette-icon switch-icon"><i class="fas fa-sitemap"></i></div>
+                    <div class="palette-info">
+                        <span class="d-name">Switch</span>
+                        <span class="d-desc">Cisco 2960 · 24 Puertos</span>
+                    </div>
+                    <i class="fas fa-grip-vertical drag-hint"></i>
+                </div>
+                <div class="palette-item" draggable="true" ondragstart="dragStart(event, 'pc')">
+                    <div class="palette-icon pc-icon"><i class="fas fa-desktop"></i></div>
+                    <div class="palette-info">
+                        <span class="d-name">PC</span>
+                        <span class="d-desc">Genérico · 1 Puerto</span>
+                    </div>
+                    <i class="fas fa-grip-vertical drag-hint"></i>
+                </div>
+            </div>
+
+            <!-- Herramientas -->
+            <div class="sidebar-section">
+                <h3 class="section-header"><i class="fas fa-wrench"></i> Herramientas</h3>
+                <div class="undo-redo-bar">
+                    <button class="tool-btn" onclick="History.undo()" title="Deshacer (Ctrl+Z)">
+                        <i class="fas fa-undo"></i> <span>Deshacer</span>
+                    </button>
+                    <button class="tool-btn" onclick="History.redo()" title="Rehacer (Ctrl+Y)">
+                        <i class="fas fa-redo"></i> <span>Rehacer</span>
+                    </button>
+                </div>
+                <div class="tools-grid-3">
+                    <button class="tool-btn" onclick="Persistence.exportJSON()" title="Guardar topología como archivo">
+                        <i class="fas fa-download"></i> <span>Guardar</span>
+                    </button>
+                    <button class="tool-btn" onclick="Persistence.importJSON()" title="Abrir archivo de topología">
+                        <i class="fas fa-folder-open"></i> <span>Abrir</span>
+                    </button>
+                    <button class="tool-btn tool-btn-danger" onclick="Persistence.clearAll()" title="Limpiar todo">
+                        <i class="fas fa-trash-alt"></i> <span>Limpiar</span>
+                    </button>
+                </div>
+            </div>
+
+            <!-- Conexiones (empujado al fondo) -->
+            <div class="sidebar-section connections-panel">
+                <h3 class="section-header"><i class="fas fa-plug"></i> Conexiones</h3>
+                <div class="cables-grid">
+                    <button class="cable-btn" onclick="selectCable('auto')" title="Automático">
+                        <i class="fas fa-bolt" style="color: #eab308;"></i>
+                    </button>
+                    <button class="cable-btn" onclick="selectCable('console')" title="Consola">
+                        <div class="cable-icon console-bg"></div>
+                    </button>
+                    <button class="cable-btn" onclick="selectCable('straight')" title="Directo">
+                        <div class="cable-icon straight-bg"></div>
+                    </button>
+                    <button class="cable-btn" onclick="selectCable('cross')" title="Cruzado">
+                        <div class="cable-icon cross-bg"></div>
+                    </button>
+                    <button class="cable-btn" onclick="selectCable('fiber')" title="Fibra Óptica">
+                        <div class="cable-icon fiber-bg"></div>
+                    </button>
+                    <button class="cable-btn" onclick="selectCable('serial')" title="Serial">
+                        <div class="cable-icon serial-bg"></div>
+                    </button>
+                    <button class="cable-btn cable-btn-eraser" onclick="selectCable('eraser')" title="Borrador">
+                        <i class="fas fa-eraser"></i>
+                    </button>
+                </div>
+                <p id="selected-cable-text" class="hint">
+                    <i class="fas fa-info-circle"></i> Selecciona un cable para conectar
+                </p>
+            </div>
         </div>
-    </div>
+    </aside>
 
-    <div id="workspace" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
+    <!-- ═══════════════ WORKSPACE ═══════════════ -->
+    <main id="workspace" ondrop="dropHandler(event)" ondragover="dragOverHandler(event)">
         <canvas id="networkCanvas"></canvas>
-    </div>
+        <div class="workspace-watermark">
+            <i class="fas fa-draw-polygon"></i>
+            <span>Arrastra dispositivos aquí</span>
+        </div>
+    </main>
 
+    <!-- ═══════════════ MODAL BACKDROP ═══════════════ -->
+    <div id="modal-overlay" onclick="closeModal()"></div>
+
+    <!-- ═══════════════ MODAL ═══════════════ -->
     <div id="device-modal">
         <div class="modal-header">
-            <span class="modal-title"><i class="fas fa-cog"></i> <span
-                    id="modal-device-name">Configuración</span></span>
-            <i class="fas fa-times close-btn" onclick="closeModal()"></i>
+            <span class="modal-title">
+                <i class="fas fa-cog fa-spin-slow"></i>
+                <span id="modal-device-name">Configuración</span>
+            </span>
+            <button class="close-btn" onclick="closeModal()">
+                <i class="fas fa-times"></i>
+            </button>
         </div>
         <div class="tabs">
-            <button class="tab-btn active" id="btn-tab-config" onclick="switchTab('config')">Físico / Config</button>
-            <button class="tab-btn" id="btn-tab-cli" onclick="switchTab('cli')">CLI (IOS)</button>
+            <button class="tab-btn active" id="btn-tab-config" onclick="switchTab('config')">
+                <i class="fas fa-sliders-h"></i> Físico / Config
+            </button>
+            <button class="tab-btn" id="btn-tab-cli" onclick="switchTab('cli')">
+                <i class="fas fa-terminal"></i> CLI (IOS)
+            </button>
         </div>
         <div id="tab-config" class="tab-content active">
             <div id="config-form-container"></div>
             <div class="modal-footer">
-                <button class="btn-cancel" onclick="deleteCurrentDevice()"
-                    style="background-color: #dc3545; float: left;">
-                    <i class="fas fa-trash"></i> Borrar
+                <button class="btn-delete" onclick="deleteCurrentDevice()">
+                    <i class="fas fa-trash"></i> Eliminar
                 </button>
-                <button class="btn-cancel" onclick="closeModal()">Cerrar</button>
-                <button class="btn-save" onclick="saveCurrentConfig()">Aplicar Cambios</button>
+                <div class="modal-footer-right">
+                    <button class="btn-cancel" onclick="closeModal()">Cerrar</button>
+                    <button class="btn-save" onclick="saveCurrentConfig()">
+                        <i class="fas fa-check"></i> Aplicar Cambios
+                    </button>
+                </div>
             </div>
         </div>
-        <div id="tab-cli" class="tab-content" style="padding:0; display:none; background-color: #1e272e;">
+        <div id="tab-cli" class="tab-content" style="padding:0; display:none;">
             <div id="terminal-view" onclick="document.getElementById('terminal-input').focus()">
-                <div id="terminal-output">Simulador de IOS</div>
+                <div id="terminal-output">
+ _____ _      _____  _             _____ _____ _____
+|   | | |_   |   __||_| _____     |  _  |  _  |     |
+| | | |  _|  |__   || || |_| |    |   __|    -|  |  |
+|_|___|_|    |_____||_||_|_|_|    |__|  |__|__|_____|
+
+NetSim Pro — Simulador IOS v2.0
+Escribe '?' para ver los comandos disponibles.
+──────────────────────────────────────────────────</div>
                 <div class="input-line">
                     <span id="prompt">Router></span>
                     <input type="text" id="terminal-input" autocomplete="off" spellcheck="false"
@@ -95,9 +180,17 @@
         </div>
     </div>
 
+    <!-- ═══════════════ SCRIPTS ═══════════════ -->
     <script src="alerts.js"></script>
     <script src="validation.js"></script>
-    <script src="script.js"></script>
+    <script src="js/device.js"></script>
+    <script src="js/canvas.js"></script>
+    <script src="js/connections.js"></script>
+    <script src="js/modal.js"></script>
+    <script src="js/cli.js"></script>
+    <script src="js/history.js"></script>
+    <script src="js/persistence.js"></script>
+    <script src="js/app.js"></script>
 </body>
 
 </html>

@@ -1,4 +1,6 @@
-/* alerts.css - Estilos del Sistema de Alertas */
+/* ═══════════════════════════════════════════
+   ALERTS — Dark Theme Toast Notifications
+   ═══════════════════════════════════════════ */
 
 #alert-container {
     position: fixed;
@@ -7,155 +9,178 @@
     z-index: 9999;
     display: flex;
     flex-direction: column;
-    gap: 12px;
+    gap: 10px;
     pointer-events: none;
 }
 
 .alert-box {
     min-width: 320px;
-    max-width: 450px;
-    background: white;
-    border-radius: 8px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+    max-width: 440px;
+    background: rgba(17, 24, 39, 0.92);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+    border-radius: 10px;
+    box-shadow:
+        0 8px 32px rgba(0, 0, 0, 0.4),
+        0 2px 8px rgba(0, 0, 0, 0.2),
+        inset 0 1px 0 rgba(255, 255, 255, 0.05);
     display: flex;
     align-items: flex-start;
-    padding: 16px;
+    padding: 14px 16px;
     gap: 12px;
     opacity: 0;
-    transform: translateX(400px);
-    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    transform: translateX(100px) scale(0.95);
+    transition: all 0.35s cubic-bezier(0.16, 1, 0.3, 1);
     pointer-events: all;
-    border-left: 4px solid;
+    border: 1px solid rgba(255, 255, 255, 0.06);
+    border-left: 3px solid;
 }
 
 .alert-box.alert-show {
     opacity: 1;
-    transform: translateX(0);
+    transform: translateX(0) scale(1);
 }
 
 .alert-box.alert-hide {
     opacity: 0;
-    transform: translateX(400px) scale(0.9);
+    transform: translateX(100px) scale(0.9);
 }
 
-/* Colores según tipo */
+/* ============================
+   TIPOS DE ALERTA
+   ============================ */
+
 .alert-success {
-    border-left-color: #198754;
-    background: linear-gradient(135deg, #ffffff 0%, #f0fdf4 100%);
+    border-left-color: #10b981;
 }
 
 .alert-error {
-    border-left-color: #dc3545;
-    background: linear-gradient(135deg, #ffffff 0%, #fef2f2 100%);
+    border-left-color: #ef4444;
 }
 
 .alert-warning {
-    border-left-color: #ffc107;
-    background: linear-gradient(135deg, #ffffff 0%, #fffbeb 100%);
+    border-left-color: #eab308;
 }
 
 .alert-info {
-    border-left-color: #0d6efd;
-    background: linear-gradient(135deg, #ffffff 0%, #eff6ff 100%);
+    border-left-color: #3b82f6;
 }
 
-/* Icono */
+/* ============================
+   ICONO
+   ============================ */
+
 .alert-icon {
     flex-shrink: 0;
-    width: 40px;
-    height: 40px;
-    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    border-radius: 8px;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 20px;
+    font-size: 16px;
 }
 
 .alert-success .alert-icon {
-    background: rgba(25, 135, 84, 0.1);
-    color: #198754;
+    background: rgba(16, 185, 129, 0.12);
+    color: #34d399;
 }
 
 .alert-error .alert-icon {
-    background: rgba(220, 53, 69, 0.1);
-    color: #dc3545;
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
 }
 
 .alert-warning .alert-icon {
-    background: rgba(255, 193, 7, 0.1);
-    color: #ffc107;
+    background: rgba(234, 179, 8, 0.12);
+    color: #facc15;
 }
 
 .alert-info .alert-icon {
-    background: rgba(13, 110, 253, 0.1);
-    color: #0d6efd;
+    background: rgba(59, 130, 246, 0.12);
+    color: #60a5fa;
 }
 
-/* Contenido */
+/* ============================
+   CONTENIDO
+   ============================ */
+
 .alert-content {
     flex: 1;
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 3px;
+    min-width: 0;
 }
 
 .alert-title {
     font-weight: 700;
-    font-size: 14px;
-    color: #212529;
-    letter-spacing: 0.3px;
+    font-size: 13px;
+    color: #f1f5f9;
+    letter-spacing: 0.2px;
 }
 
 .alert-message {
-    font-size: 13px;
-    color: #495057;
+    font-size: 12px;
+    color: #94a3b8;
     line-height: 1.5;
 }
 
-/* Botón de cierre */
+/* ============================
+   BOTÓN DE CIERRE
+   ============================ */
+
 .alert-close {
     flex-shrink: 0;
     width: 24px;
     height: 24px;
     border: none;
     background: transparent;
-    color: #6c757d;
+    color: #64748b;
     cursor: pointer;
     border-radius: 4px;
     display: flex;
     align-items: center;
     justify-content: center;
     transition: all 0.2s;
-    font-size: 14px;
+    font-size: 12px;
 }
 
 .alert-close:hover {
-    background: rgba(0, 0, 0, 0.05);
-    color: #212529;
+    background: rgba(255, 255, 255, 0.06);
+    color: #e2e8f0;
 }
 
 .alert-close:active {
-    transform: scale(0.9);
+    transform: scale(0.85);
 }
 
-/* Animación de pulso para alertas de error */
-@keyframes pulse {
+/* ============================
+   ANIMACIONES
+   ============================ */
 
-    0%,
-    100% {
-        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15), 0 2px 6px rgba(0, 0, 0, 0.1);
+@keyframes pulse-glow {
+    0%, 100% {
+        box-shadow:
+            0 8px 32px rgba(0, 0, 0, 0.4),
+            0 2px 8px rgba(0, 0, 0, 0.2);
     }
-
     50% {
-        box-shadow: 0 8px 24px rgba(220, 53, 69, 0.3), 0 2px 6px rgba(220, 53, 69, 0.2);
+        box-shadow:
+            0 8px 32px rgba(239, 68, 68, 0.2),
+            0 2px 8px rgba(239, 68, 68, 0.15),
+            0 0 20px rgba(239, 68, 68, 0.1);
     }
 }
 
 .alert-error.alert-show {
-    animation: pulse 2s ease-in-out;
+    animation: pulse-glow 2s ease-in-out;
 }
 
-/* Responsive */
+/* ============================
+   RESPONSIVE
+   ============================ */
+
 @media (max-width: 768px) {
     #alert-container {
         top: 10px;
