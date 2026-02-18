@@ -75,19 +75,19 @@ function resizeCanvas() {
  */
 function drawRouterIcon(ctx, x, y) {
     const theme = DEVICE_THEME.router;
-    const bw = 48, bh = 24;   // body width/height
+    const bw = 64, bh = 30;   // body width/height (más grande para que los 3 puertos quepan)
 
     // ── Glow ──
     ctx.shadowColor = theme.glow;
     ctx.shadowBlur = 18;
 
     // ── Cuerpo del router (rectángulo redondeado) ──
-    roundRect(ctx, x - bw / 2, y - bh / 2 + 2, bw, bh, 5);
+    roundRect(ctx, x - bw / 2, y - bh / 2 + 2, bw, bh, 6);
     ctx.fillStyle = theme.bg;
     ctx.fill();
     ctx.strokeStyle = theme.border;
     ctx.lineWidth = 1.5;
-    roundRect(ctx, x - bw / 2, y - bh / 2 + 2, bw, bh, 5);
+    roundRect(ctx, x - bw / 2, y - bh / 2 + 2, bw, bh, 6);
     ctx.stroke();
 
     ctx.shadowBlur = 0;
@@ -99,24 +99,24 @@ function drawRouterIcon(ctx, x, y) {
     ctx.lineCap = 'round';
 
     ctx.beginPath();
-    ctx.moveTo(x - 10, y - bh / 2 + 2);
-    ctx.lineTo(x - 16, y - bh / 2 - 14);
+    ctx.moveTo(x - 14, y - bh / 2 + 2);
+    ctx.lineTo(x - 20, y - bh / 2 - 14);
     ctx.stroke();
 
     // Bolita en la punta
     ctx.beginPath();
-    ctx.arc(x - 16, y - bh / 2 - 14, 2.5, 0, Math.PI * 2);
+    ctx.arc(x - 20, y - bh / 2 - 14, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = theme.icon;
     ctx.fill();
 
     // ── Antena derecha (inclinada al otro lado) ──
     ctx.beginPath();
-    ctx.moveTo(x + 10, y - bh / 2 + 2);
-    ctx.lineTo(x + 16, y - bh / 2 - 14);
+    ctx.moveTo(x + 14, y - bh / 2 + 2);
+    ctx.lineTo(x + 20, y - bh / 2 - 14);
     ctx.stroke();
 
     ctx.beginPath();
-    ctx.arc(x + 16, y - bh / 2 - 14, 2.5, 0, Math.PI * 2);
+    ctx.arc(x + 20, y - bh / 2 - 14, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = theme.icon;
     ctx.fill();
 
@@ -126,38 +126,41 @@ function drawRouterIcon(ctx, x, y) {
     ctx.globalAlpha = 0.3;
     for (let i = 1; i <= 2; i++) {
         ctx.beginPath();
-        ctx.arc(x, y - bh / 2 - 6, i * 6, Math.PI * 1.2, Math.PI * 1.8);
+        ctx.arc(x, y - bh / 2 - 6, i * 7, Math.PI * 1.2, Math.PI * 1.8);
         ctx.stroke();
     }
     ctx.globalAlpha = 1;
 
     // ── LEDs de estado ──
-    const ledY = y - 2;
+    const ledY = y - 4;
     // LED verde (power)
     ctx.beginPath();
-    ctx.arc(x - 14, ledY, 2.5, 0, Math.PI * 2);
+    ctx.arc(x - 18, ledY, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = '#4ade80';
     ctx.fill();
     // LED azul (actividad)
     ctx.beginPath();
-    ctx.arc(x - 7, ledY, 2.5, 0, Math.PI * 2);
+    ctx.arc(x - 10, ledY, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = theme.icon;
     ctx.fill();
     // LED azul tenue
     ctx.beginPath();
-    ctx.arc(x, ledY, 2.5, 0, Math.PI * 2);
+    ctx.arc(x - 2, ledY, 2.5, 0, Math.PI * 2);
     ctx.fillStyle = theme.icon;
     ctx.globalAlpha = 0.4;
     ctx.fill();
     ctx.globalAlpha = 1;
 
-    // ── Puertos Ethernet (3 rectángulos en la parte inferior) ──
+    // ── Puertos Ethernet (3 rectángulos centrados en la parte inferior) ──
     ctx.fillStyle = theme.icon;
     ctx.globalAlpha = 0.6;
-    const portW = 7, portH = 5;
+    const portW = 8, portH = 5;
+    const portSpacing = 4;
+    const totalPortsW = 3 * portW + 2 * portSpacing;  // ancho total de los 3 puertos
+    const portStartX = x - totalPortsW / 2 + 8;       // centrado con offset derecho
     const portY = y + 6;
     for (let i = 0; i < 3; i++) {
-        roundRect(ctx, x + 4 + i * (portW + 3), portY, portW, portH, 1.5);
+        roundRect(ctx, portStartX + i * (portW + portSpacing), portY, portW, portH, 1.5);
         ctx.fill();
     }
     ctx.globalAlpha = 1;
@@ -279,7 +282,7 @@ function drawPCIcon(ctx, x, y) {
  */
 function getDeviceRadius(type) {
     switch (type) {
-        case 'router': return 28;
+        case 'router': return 36;
         case 'switch': return 28;
         case 'pc': return 24;
         default: return 26;
