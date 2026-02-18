@@ -36,7 +36,7 @@ canvas.addEventListener('mousedown', e => {
     // Modo borrador
     if (currentCableType === 'eraser') {
         // Intentar borrar dispositivo
-        const deviceIdx = devices.findIndex(d => Math.hypot(d.x - x, d.y - y) < 30);
+        const deviceIdx = devices.findIndex(d => Math.hypot(d.x - x, d.y - y) < 38);
         if (deviceIdx !== -1) {
             const deviceToDelete = devices[deviceIdx];
             History.push();
@@ -71,7 +71,7 @@ canvas.addEventListener('mousedown', e => {
     }
 
     // Lógica normal: conectar o arrastrar
-    const clicked = devices.find(d => Math.hypot(d.x - x, d.y - y) < 30);
+    const clicked = devices.find(d => Math.hypot(d.x - x, d.y - y) < 38);
     if (clicked) {
         if (currentCableType) {
             if (!cableStartDevice) {
@@ -101,7 +101,7 @@ canvas.addEventListener('mouseup', () => draggingDevice = null);
 
 canvas.addEventListener('dblclick', e => {
     if (!currentCableType) {
-        const clicked = devices.find(d => Math.hypot(d.x - e.offsetX, d.y - e.offsetY) < 30);
+        const clicked = devices.find(d => Math.hypot(d.x - e.offsetX, d.y - e.offsetY) < 38);
         if (clicked) openDeviceModal(clicked);
     }
 });
